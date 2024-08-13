@@ -2,15 +2,16 @@ services:
   webserver:
     build:
       context: .
-      dockerfile: ./frankenphp-docker/Dockerfile
+      dockerfile: frankenphp/Dockerfile
       target: frankenphp_dev
     volumes:
       - ./:/app
-      - ./frankenphp-docker/conf.d/app.dev.ini:/usr/local/etc/php/conf.d/app.dev.ini:ro
+      - ./frankenphp/conf.d/app.dev.ini:/usr/local/etc/php/conf.d/app.dev.ini:ro
     environment:
       # See https://xdebug.org/docs/all_settings#mode
       XDEBUG_MODE: "${XDEBUG_MODE:-off}"
-      PHP_IDE_CONFIG: 'serverName=localhost'
+      # Uncomment this to configure the server name for Xdebug, default is localhost
+      # PHP_IDE_CONFIG: 'serverName=localhost'
       DB_CONNECTION: ${DB_CONNECTION:-pgsql}
       DB_HOST: ${DB_HOST:-database}
       DB_PORT: ${DB_PORT:-5432}
@@ -30,6 +31,8 @@ services:
         condition: service_healthy
 
   database:
+    volumes:
+      - ./postgresql/:/docker-entrypoint-initdb.d/
     ports:
       - "5432:5432"
 
