@@ -56,10 +56,14 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'artisan' ]; then
         cp .env.example .env
 
         php artisan key:generate
-        echo "Depois de rodar as key:generate" >&2
-        echo "Dentro de $(pwd)" >&2
-        echo "Arquivo .gitignore:  " >&2
-        echo "$(cat .gitignore)" >&2
+    fi
+
+    if [ ! -f ".env.testing" ]; then
+        cp .env .env.testing
+        php artisan key:generate --env=testing
+        sed -i "s/.*DB_DATABASE=.*/DB_DATABASE=test/g" .env.testing
+        sed -i "s/.*DB_USERNAME=.*/DB_USERNAME=test/g" .env.testing
+        sed -i "s/.*DB_PASSWORD=.*/DB_PASSWORD=test/g" .env.testing
     fi
 
     if grep -q ^DB_CONNECTION= .env; then

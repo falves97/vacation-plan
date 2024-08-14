@@ -18,6 +18,7 @@ class TokenResource extends JsonResource
     {
         return [
             'token' => $this->plainTextToken,
+            'token_type' => 'Bearer',
             'expires_at' => now()->addMinutes(config('sanctum.expiration')),
         ];
     }

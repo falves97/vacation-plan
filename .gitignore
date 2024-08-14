@@ -18,6 +18,6 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
-
+.env.testing
 # Untracked octane frankenphp, em caso de uso da aplicação sem o octane
 frankenphp-worker.php
