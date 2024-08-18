@@ -13,10 +13,8 @@ use App\Reposiories\HolidayPlanRepository;
 use App\Services\HolidayPlanService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Gate;
 
-/**
- * @todo create policies for HolidayPlan
- */
 class HolidayPlanController
 {
     /**
@@ -72,6 +70,7 @@ class HolidayPlanController
      */
     public function show(HolidayPlan $holidayPlan): JsonResponse
     {
+        Gate::authorize('view', $holidayPlan);
         return (new HolidayPlanResource($holidayPlan))
             ->response()
             ->setStatusCode(200);
@@ -88,6 +87,8 @@ class HolidayPlanController
     public function update(UpdateHolidayPlanRequest $request, HolidayPlan $holidayPlan, HolidayPlanService $holidayPlanService): JsonResponse
     {
         $validated = $request->validated();
+
+        Gate::authorize('update', $holidayPlan);
 
         $holidayPlanDTO = new HolidayPlanDTO(
             $validated['title'] ?? $holidayPlan->title,
@@ -114,6 +115,8 @@ class HolidayPlanController
      */
     public function destroy(HolidayPlan $holidayPlan): JsonResponse
     {
+        Gate::authorize('delete', $holidayPlan);
+
         $holidayPlan->delete();
 
         return response()->json(null, 204);

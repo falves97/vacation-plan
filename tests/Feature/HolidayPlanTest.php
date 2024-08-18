@@ -363,4 +363,103 @@ class HolidayPlanTest extends TestCase
             'id' => $holidayPlan->id,
         ]);
     }
+
+    /**
+     * Test view holiday plan route with unauthorized user.
+     *
+     * @return void
+     */
+    public function test_view_holiday_plan_unauthorized()
+    {
+        /** @var User $owner */
+        $owner = User::factory()->create();
+        /** @var User $user */
+        $user = User::factory()->create();
+        /** @var User $participant */
+        $participant = User::factory()->create();
+
+        $holidayPlanDTO = new HolidayPlanDTO(
+            'Christmas party',
+            'Christmas party description',
+            Carbon::now(),
+            'London',
+            $owner
+        );
+
+        $holidayPlanService = new HolidayPlanService();
+        $holidayPlan = $holidayPlanService->createHolidayPlan($holidayPlanDTO, [$participant->id]);
+
+        $this->actingAs($user);
+        $response = $this->getJson("/api/holiday-plans/{$holidayPlan->id}");
+
+        $response->assertStatus(403);
+    }
+
+    /**
+     * Test update holiday plan route with unauthorized user.
+     *
+     * @return void
+     */
+    public function test_update_holiday_plan_unauthorized()
+    {
+        /** @var User $owner */
+        $owner = User::factory()->create();
+        /** @var User $user */
+        $user = User::factory()->create();
+        /** @var User $participant */
+        $participant = User::factory()->create();
+
+        $holidayPlanDTO = new HolidayPlanDTO(
+            'Christmas party',
+            'Christmas party description',
+            Carbon::now(),
+            'London',
+            $owner
+        );
+
+        $holidayPlanService = new HolidayPlanService();
+        $holidayPlan = $holidayPlanService->createHolidayPlan($holidayPlanDTO, [$participant->id]);
+
+        $this->actingAs($user);
+        $response = $this->putJson("/api/holiday-plans/{$holidayPlan->id}", [
+            'title' => 'New Year party',
+            'description' => 'New Year party description',
+            'date' => Carbon::now()->addDay()->format('Y-m-d'),
+            'location' => 'Paris',
+            'participants' => [$participant->id],
+        ]);
+
+        $response->assertStatus(403);
+    }
+
+    /**
+     * Test delete holiday plan route with unauthorized user.
+     *
+     * @return void
+     */
+    public function test_delete_holiday_plan_unauthorized()
+    {
+        /** @var User $owner */
+        $owner = User::factory()->create();
+        /** @var User $user */
+        $user = User::factory()->create();
+        /** @var User $participant */
+        $participant = User::factory()->create();
+
+        $holidayPlanDTO = new HolidayPlanDTO(
+            'Christmas party',
+            'Christmas party description',
+            Carbon::now(),
+            'London',
+            $owner
+        );
+
+        $holidayPlanService = new HolidayPlanService();
+        $holidayPlan = $holidayPlanService->createHolidayPlan($holidayPlanDTO, [$participant->id]);
+
+        $this->actingAs($user);
+        $response = $this->deleteJson("/api/holiday-plans/{$holidayPlan->id}");
+
+        $response->assertStatus(403);
+    }
 }
