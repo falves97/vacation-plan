@@ -16,7 +16,10 @@ use Symfony\Component\HttpFoundation\Response;
 class SecurityApiController
 {
     /**
-     * Método para registrar un usuario.
+     * Action to register a user.
+     *
+     * @param RegisterRequest $request
+     * @return JsonResponse
      */
     public function register(RegisterRequest $request): JsonResponse
     {
@@ -25,20 +28,23 @@ class SecurityApiController
 
         $validated['password'] = Hash::make($validated['password']);
 
-        $user = User::create($validated);
+        $user = User::query()->create($validated);
 
         return response()->json($user, Response::HTTP_CREATED);
     }
 
     /**
-     * Método para loguear un usuario. Retorna um erro se as credenciais são inválidas.
+     * Action to log in a user. Returns an error if the credentials are invalid.
+     *
+     * @param LoginRequest $loginRequest
+     * @return TokenResource
      * @throws ValidationException
      */
     public function login(LoginRequest $loginRequest): TokenResource
     {
         $validated = $loginRequest->validated();
 
-        $user = User::where('email', $validated["email"])->first();
+        $user = User::query()->where('email', $validated["email"])->first();
 
         if (!$user || !Hash::check($validated["password"], $user->password)) {
             throw ValidationException::withMessages([
@@ -52,8 +58,11 @@ class SecurityApiController
     }
 
     /**
-     * Método para criar um token de autenticação. Para que o usuário possa acessar ter um token
-     * válido quando o token atual estiver próximo de expirar.
+     * Action to create an authentication token.
+     * So the user can have a valid token when the current token is near to expire.
+     *
+     * @param Request $request
+     * @return TokenResource
      */
     public function createToken(Request $request): TokenResource
     {
@@ -63,7 +72,10 @@ class SecurityApiController
     }
 
     /**
-     * Método para deslogar um usuário.
+     * Action to log out a user.
+     *
+     * @param Request $request
+     * @return JsonResponse
      */
     public function logout(Request $request): JsonResponse
     {
