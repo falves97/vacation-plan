@@ -11,8 +11,10 @@ use App\Models\HolidayPlan;
 use App\Models\User;
 use App\Reposiories\HolidayPlanRepository;
 use App\Services\HolidayPlanService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 
 class HolidayPlanController
@@ -120,5 +122,19 @@ class HolidayPlanController
         $holidayPlan->delete();
 
         return response()->json(null, 204);
+    }
+
+    /**
+     * Export holiday plan to PDF
+     *
+     * @param HolidayPlan $holidayPlan
+     * @return Response
+     */
+    public function exportPdf(HolidayPlan $holidayPlan): Response
+    {
+        Gate::authorize('view', $holidayPlan);
+
+        return Pdf::loadView('holiday_plans.pdf', ['holidayPlan' => $holidayPlan])
+            ->download($holidayPlan->title . '.pdf');
     }
 }

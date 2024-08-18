@@ -17,5 +17,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     });
 
     Route::apiResource('holiday-plans', HolidayPlanController::class);
+    Route::get('/holiday-plans/{holidayPlan}/pdf', [HolidayPlanController::class, 'exportPdf']);
 });
 
