@@ -6,8 +6,6 @@
 /storage/*.key
 /vendor
 .env
-.env.backup
-.env.production
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
@@ -18,6 +16,7 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
-.env.testing
+.env.*
+
 # Untracked octane frankenphp, em caso de uso da aplicação sem o octane
 frankenphp-worker.php

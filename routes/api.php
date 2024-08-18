@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HolidayPlanController;
 use App\Http\Controllers\SecurityApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -14,5 +15,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/me', function (Request $request) {
         return $request->user();
     });
+
+    Route::apiResource('holiday-plans', HolidayPlanController::class);
 });
 
