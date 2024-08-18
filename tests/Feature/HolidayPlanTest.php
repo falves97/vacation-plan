@@ -6,6 +6,7 @@ use App\DTOs\HolidayPlanDTO;
 use App\Models\HolidayPlan;
 use App\Models\User;
 use App\Services\HolidayPlanService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -461,5 +462,32 @@ class HolidayPlanTest extends TestCase
         $response = $this->deleteJson("/api/holiday-plans/{$holidayPlan->id}");
 
         $response->assertStatus(403);
+    }
+
+    public function test_export_pdf()
+    {
+        /** @var User $owner */
+        $owner = User::factory()->create();
+        /** @var User $participant1 */
+        $participant1 = User::factory()->create();
+        /** @var User $participant2 */
+        $participant2 = User::factory()->create();
+
+        $holidayPlanDTO = new HolidayPlanDTO(
+            'Christmas party',
+            'Christmas party description',
+            Carbon::now(),
+            'London',
+            $owner
+        );
+
+        $holidayPlanService = new HolidayPlanService();
+        $holidayPlan = $holidayPlanService->createHolidayPlan($holidayPlanDTO, [$participant1->id, $participant2->id]);
+
+        $this->actingAs($owner);
+        $response = $this->get("/api/holiday-plans/{$holidayPlan->id}/pdf");
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/pdf');
     }
 }
