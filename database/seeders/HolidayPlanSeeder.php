@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\HolidayPlan;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class HolidayPlanSeeder extends Seeder
@@ -14,8 +15,12 @@ class HolidayPlanSeeder extends Seeder
     {
         HolidayPlan::query()->truncate();
 
-        HolidayPlan::factory()->count(20)->create([
-            'owner_id' => 1,
-        ]);
+        for ($i = 0; $i < 30; $i++) {
+            $owner = User::inRandomOrder()->first();
+
+            HolidayPlan::factory()->create([
+                'owner_id' => $owner->id,
+            ]);
+        }
     }
 }
