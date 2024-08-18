@@ -11,7 +11,8 @@ class SecurityTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Cria um usuário de teste
+     * Test user registration
+     *
      * @return TestResponse
      */
     public function registerTestUser(): TestResponse
@@ -24,7 +25,7 @@ class SecurityTest extends TestCase
     }
 
     /**
-     * Teste de sucesso no registro de usuário
+     * Test user registration success
      *
      * @return void
      */
@@ -36,13 +37,15 @@ class SecurityTest extends TestCase
     }
 
     /**
-     * Teste de falha no registro de usuário
+     * Test user registration failure
      *
      * @return void
      */
     public function test_register_fail()
     {
-        /** Primeiro, tenta registrar um usuário com e-mail inválido */
+        /**
+         * First, try to register a user with an invalid email.
+         */
         $response = $this->postJson('/api/register', [
             'name' => 'Test User',
             'email' => 'testemail.com',
@@ -52,7 +55,9 @@ class SecurityTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['email']);
 
-        /** Depois, tenta registrar um usuário com e-mail e senha inválidos */
+        /**
+         * After that, try to register a user with an invalid email and password.
+         */
         $response = $this->postJson('/api/register', [
             'name' => 'Test User',
             'email' => 'testemail.com',
@@ -64,16 +69,20 @@ class SecurityTest extends TestCase
     }
 
     /**
-     * Teste de sucesso no login de usuário
+     * Test user log in success
      *
      * @return void
      */
     public function test_login_success(): void
     {
-        /** Primeiro, registra um usuário */
+        /**
+         * First, register a user.
+         */
         $this->registerTestUser();
 
-        /** Depois, faz o login */
+        /**
+         * After that, log in.
+         */
         $response = $this->postJson('/api/login', [
             'email' => 'test@email.com',
             'password' => 'password',
@@ -84,18 +93,22 @@ class SecurityTest extends TestCase
     }
 
     /**
-     * Teste de falha no login de usuário
+     * Test user log in failure
      *
      * @return void
      */
     public function test_login_fail(): void
     {
-        /** Primeiro, registra um usuário */
+        /**
+         * First, register a user.
+         */
         $response = $this->registerTestUser();
 
         $response->assertStatus(201);
 
-        /** Depois, tenta fazer o login com e-mail inválido */
+        /**
+         * After that, try to log in with an invalid email.
+         */
         $response = $this->postJson('/api/login', [
             'email' => 'testemail.com',
             'password' => 'password',
@@ -103,7 +116,9 @@ class SecurityTest extends TestCase
 
         $response->assertStatus(422);
 
-        /** Depois, tenta fazer o login com senha inválida */
+        /**
+         * After that, try to log in with an invalid password.
+         */
         $response = $this->postJson('/api/login', [
             'email' => 'test@email.com',
             'password' => 'pass',
@@ -113,19 +128,23 @@ class SecurityTest extends TestCase
     }
 
     /**
-     * Teste de sucesso no logout de usuário
+     * Test user log out success
      *
      * @return void
      */
     public function test_logout_success(): void
 
     {
-        /** Primeiro, registra um usuário */
+        /**
+         * First, register a user.
+         */
         $response = $this->registerTestUser();
 
         $response->assertStatus(201);
 
-        /** Depois, faz o login */
+        /**
+         * After that, log in.
+         */
         $response = $this->postJson('/api/login', [
             'email' => 'test@email.com',
             'password' => 'password',
@@ -135,14 +154,16 @@ class SecurityTest extends TestCase
 
         $token = $response->json('token');
 
-        /** Depois, faz o logout */
+        /**
+         * After that, log out.
+         */
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)->getJson('/api/logout');
 
         $response->assertStatus(204);
     }
 
     /**
-     * Teste de falha no logout de usuário
+     * Test user log out failure
      *
      * @return void
      */
