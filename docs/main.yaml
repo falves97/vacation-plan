@@ -1,0 +1,578 @@
+openapi: 3.1.0
+info:
+  title: HoliayPlan API
+  description: |-
+    # Holiday Events RESTful API
+
+    This RESTful API allows the creation and management of holiday events, with user authentication features. The API enables adding title, description, date, location, and participants to events, as well as exporting events in PDF format.
+  version: 1.0.0
+  license:
+    name: GPL-3.0
+    identifier: GPL-3.0
+
+servers:
+  - url: https://localhost/api
+    description: Local server
+tags:
+  - name: authentication
+    description: Authentication endpoints
+  - name: users
+    description: Users endpoints
+  - name: holiday-plans
+    description: Holiday plans endpoints
+paths:
+  /holiday-plans:
+    get:
+      operationId: getHolidayPlans
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - holiday-plans
+      summary: Get all holidays
+      description: Get all holidays
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  holidays_plans:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/HolidayPlan"
+                  links:
+                    $ref: "#/components/schemas/Links"
+                  meta:
+                    $ref: "#/components/schemas/Meta"
+        "401":
+          description: Unauthenticated
+    post:
+      operationId: createHolidayPlan
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - holiday-plans
+      summary: Create a new holiday
+      description: Create a new holiday. You can add participants by their IDs. To get the list of users, use the /users endpoint.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - title
+                - description
+                - date
+                - location
+              $ref: "#/components/schemas/HolidayPlanCreate"
+      responses:
+        "201":
+          description: Holiday created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HolidayPlan"
+        "401":
+          description: Unauthenticated
+        "422":
+          description: Unprocessable Entity (Validation error)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: The given data was invalid.
+                  errors:
+                    type: object
+                    properties:
+                      title:
+                        type: array
+                        items:
+                          type: string
+                          example: The title field is required.
+                      description:
+                        type: array
+                        items:
+                          type: string
+                          example: The description field is required.
+                      date:
+                        type: array
+                        items:
+                          type: string
+                          example: The date field is required.
+                      location:
+                        type: array
+                        items:
+                          type: string
+                          example: The location field is required.
+                      participants:
+                        type: array
+                        items:
+                          type: string
+                          example: The selected participants.0 is invalid.
+
+  /holiday-plans/{id}:
+    get:
+      operationId: getHolidayPlan
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - holiday-plans
+      summary: Get a holiday
+      description: Get a holiday
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The holiday ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HolidayPlan"
+        "404":
+          description: Holiday not found
+        "403":
+          description: Forbidden
+        "401":
+          description: Unauthenticated
+    put:
+      operationId: updateHolidayPlan
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - holiday-plans
+      summary: Update a holiday
+      description: Update a holiday
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The holiday ID
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HolidayPlanCreate"
+      responses:
+        "200":
+          description: Holiday updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HolidayPlan"
+        "404":
+          description: Holiday not found
+        "403":
+          description: Forbidden
+        "401":
+          description: Unauthenticated
+        "422":
+          description: Unprocessable Entity (Validation error)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: The title field must be a string.
+                  errors:
+                    type: object
+                    properties:
+                      title:
+                        type: array
+                        items:
+                          type: string
+                          example: The title field must be a string.
+                      description:
+                        type: array
+                        items:
+                          type: string
+                          example: The description field must be a string.
+                      date:
+                        type: array
+                        items:
+                          type: string
+                          example: The date field must be a valid date.
+                      location:
+                        type: array
+                        items:
+                          type: string
+                          example: The location field must be a string.
+    delete:
+      operationId: deleteHolidayPlan
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - holiday-plans
+      summary: Delete a holiday
+      description: Delete a holiday
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The holiday ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Holiday deleted
+        "404":
+          description: Holiday not found
+        "403":
+          description: Forbidden
+        "401":
+          description: Unauthenticated
+
+  /holiday-plans/{id}/pdf:
+    get:
+      operationId: getHolidayPlanPdf
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - holiday-plans
+      summary: Get a holiday PDF
+      description: Get a holiday PDF
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The holiday ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Holiday not found
+        "403":
+          description: Forbidden
+        "401":
+          description: Unauthenticated
+
+  /users:
+    get:
+      operationId: getUsers
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - users
+      summary: Get all users
+      description: Get all users
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+                  links:
+                    $ref: "#/components/schemas/Links"
+                  meta:
+                    $ref: "#/components/schemas/Meta"
+        "401":
+          description: Unauthenticated
+
+  /me:
+    get:
+      operationId: getMe
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - users
+      summary: Get the authenticated user
+      description: Get the authenticated user
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthenticated
+
+  /register:
+    post:
+      operationId: register
+      security: [ ]
+      tags:
+        - authentication
+      summary: Register a new user
+      description: Register a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - name
+                - email
+                - password
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "422":
+          description: Unprocessable Entity (Validation error)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: The given data was invalid.
+                  errors:
+                    type: object
+                    properties:
+                      name:
+                        type: array
+                        items:
+                          type: string
+                          example: The name field is required.
+                      email:
+                        type: array
+                        items:
+                          type: string
+                          example: The email field is required.
+                      password:
+                        type: array
+                        items:
+                          type: string
+                          example: The password field is required.
+
+  /login:
+    post:
+      operationId: login
+      security: [ ]
+      tags:
+        - authentication
+      summary: Login
+      description: Login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - email
+                - password
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: 1|6A1ps1ZDKJiinOkLRu2tHnBy2cTzvYyrjkUwdmfF36ebdefd
+                  token_type:
+                    type: string
+                    example: Bearer
+                  expires_in:
+                    type: string
+                    format: date-time
+                    example: 2024-08-19T08:13:47.891217Z
+        "422":
+          description: Unprocessable Entity (Validation error)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: The provided credentials are incorrect.
+                  errors:
+                    type: object
+                    properties:
+                      email:
+                        type: array
+                        items:
+                          type: string
+                          example: The provided credentials are incorrect.
+  /logout:
+    get:
+      operationId: logout
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - authentication
+      summary: Logout
+      description: Logout
+      responses:
+        "204":
+          description: Logout successful
+        "401":
+          description: Unauthenticated
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+    HolidayPlan:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+          format: date
+        location:
+          type: string
+        participants:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+    HolidayPlanCreate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+          format: date
+        location:
+          type: string
+        participants:
+          type: array
+          items:
+            type: integer
+    Links:
+      type: object
+      properties:
+        first:
+          type: string
+          format: uri
+          example: https://localhost/api/holidays?page=1
+        last:
+          type: string
+          format: uri
+          example: https://localhost/api/holidays?page=10
+        prev:
+          type:
+            - string
+            - "null"
+          format: uri
+          example: https://localhost/api/holidays?page=1
+        next:
+          type:
+            - string
+            - "null"
+          format: uri
+          example: https://localhost/api/holidays?page=1
+    Meta:
+      type: object
+      properties:
+        current_page:
+          type: integer
+          format: int64
+          example: 1
+        from:
+          type: integer
+          format: int64
+          example: 1
+        last_page:
+          type: integer
+          format: int64
+          example: 10
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/Link"
+        path:
+          type: string
+          example: https://localhost/api/holidays
+        per_page:
+          type: integer
+          format: int64
+          example: 15
+        to:
+          type: integer
+          format: int64
+          example: 15
+        total:
+          type: integer
+          format: int64
+          example: 150
+    Link:
+      type: object
+      properties:
+        url:
+          type:
+            - string
+            - "null"
+          format: uri
+          example: https://localhost/api/holidays?page=1
+        label:
+          type: string
+          example: 1
+        active:
+          type: boolean
+          example: true
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
