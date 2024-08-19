@@ -27,8 +27,8 @@ class StoreHolidayPlanRequest extends FormRequest
             'description' => 'required|string',
             'date' => 'required|date',
             'location' => 'required|string',
-            'participants' => 'required|array',
-            'participants.*' => 'required|exists:users,id',
+            'participants' => 'array',
+            'participants.*' => 'exists:users,id',
         ];
     }
 }
